@@ -1,0 +1,15 @@
+services:
+  school:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      SCHOOL_DATA_DIR: /data
+      SCHOOL_COOKIE_SECURE: ${SCHOOL_COOKIE_SECURE:-false}
+    volumes:
+      - school_data:/data
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+volumes:
+  school_data:
