@@ -1,0 +1,21 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.mypy]
+python_version = "3.11"
+# Typed security and persistence boundaries; the legacy scheduling/UI services
+# are being migrated incrementally and are not represented as fully typed.
+files = ["app/config.py", "app/models", "app/services/auth.py", "app/services/common.py", "app/upload_guard.py", "app/validation.py"]
+strict = true
+follow_imports = "silent"
