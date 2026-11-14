@@ -109,7 +109,7 @@ def cancel_generation(job_id: str, request: Request):
 
 @router.get('/timetable')
 def timetable(session: DB, class_id: int | None = None, teacher_id: int | None = None):
-    return school.timetable(session, class_id=class_id, guil=teacher_id)
+    return school.timetable(session, class_id=class_id, teacher_id=teacher_id)
 
 
 @router.patch('/timetable/{lesson_id}')

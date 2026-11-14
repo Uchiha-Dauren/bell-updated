@@ -312,7 +312,7 @@ def planning_snapshot(ssi: Session) -> dict:
     }
 
 
-def timetable(ssi: Session, class_id: int | None = None, guil: int | None = None):
+def timetable(ssi: Session, class_id: int | None = None, teacher_id: int | None = None):
     query = select(TimetableLesson).order_by(
         TimetableLesson.weekday, TimetableLesson.period, TimetableLesson.class_id
     )
@@ -332,13 +332,11 @@ def timetable(ssi: Session, class_id: int | None = None, guil: int | None = None
         )
         for zhol in ght
         if (class_id is None or zhol.class_id == class_id)
-        and (guil is None or zhol.teacher_id == guil)
+        and (teacher_id is None or zhol.teacher_id == teacher_id)
     ]
     settings = get_settings(ssi)
     return {
         'lessons': lessons,
-        # Quality describes the whole saved school week. A teacher-only view
-        # omits other teachers' lessons and would invent false class windows.
         'quality': timetable_quality([row_dict(zhol) for zhol in ght]),
         'periods': period_times(settings),
         'shift_periods': {
