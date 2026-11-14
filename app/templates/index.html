@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <meta content="light" name="color-scheme"/>
+    <link href="{{ url_for('static', path='favicon.svg') }}" rel="icon" type="image/svg+xml"/>
+    <title>
+      Школьный ритм — расписание и звонки
+    </title>
+    <link href="{{ url_for('static', path='style.css') }}" rel="stylesheet"/>
+    <script defer="" src="{{ url_for('static', path='app.js') }}">
+    </script>
+  </head>
+  <body>
+    <section aria-labelledby="login-title" class="login-screen" id="login-screen">
+      <div class="login-intro">
+        <div class="brand">
+          <span aria-hidden="true" class="brand-mark">
+            Ш
+          </span>
+          <span>
+            Школьный ритм
+            <small>
+              Расписание и музыкальные звонки
+            </small>
+          </span>
+        </div>
+        <p class="eyebrow">
+          КАЖДОМУ УРОКУ — СВОЁ ВРЕМЯ
+        </p>
+        <h1>
+          Порядок в расписании.
+          <br/>
+          Музыка на перемене.
+        </h1>
+        <p>
+          Соберите учебную неделю без пересечений и настройте звонки для своей школы.
+        </p>
+        <div class="rhythm-strip">
+          <span>
+            <strong>
+              45
+            </strong>
+            минут урок
+          </span>
+          <span>
+            <strong>
+              5
+            </strong>
+            минут перемена
+          </span>
+          <span>
+            <strong>
+              15
+            </strong>
+            большая перемена
+          </span>
+        </div>
+      </div>
+      <div class="login-card">
+        <span class="mini-label">
+          ДОСТУП К УПРАВЛЕНИЮ
+        </span>
+        <h2 id="login-title">
+          Вход в школу
+        </h2>
+        <p>
+          Войдите, чтобы работать с расписанием, данными школы и музыкой.
+        </p>
+        <form id="login-form">
+          <label>
+            Имя пользователя
+            <input autocomplete="username" autofocus="" maxlength="80" name="username" required=""/>
+          </label>
+          <label>
+            Пароль
+            <input autocomplete="current-password" maxlength="1024" name="password" required="" type="password"/>
+          </label>
+          <div class="notice error" hidden="" id="login-error" role="alert">
+          </div>
+          <button class="button primary" type="submit">
+            Войти
+          </button>
+        </form>
+        <p class="hint">
+          Данные для входа выдаёт администратор школы.
+        </p>
+        <p class="hint" id="login-loading" role="status">
+          Проверяем вход…
+        </p>
+      </div>
+    </section>
+    <div class="app-shell" hidden="" id="workspace">
+      <aside class="sidebar">
+        <a class="brand" data-page="overview" href="#overview">
+          <span aria-hidden="true" class="brand-mark">
+            Ш
+          </span>
+          <span>
+            Школьный ритм
+            <small>
+              Расписание и звонки
+            </small>
+          </span>
+        </a>
+        <div class="workspace-label">
+          УПРАВЛЕНИЕ ШКОЛОЙ
+        </div>
+        <nav aria-label="Главная навигация">
+          <button aria-current="page" class="nav-item active" data-page="overview">
+            <span aria-hidden="true">
+              ◫
+            </span>
+            Обзор
+          </button>
+          <button class="nav-item" data-page="school">
+            <span aria-hidden="true">
+              ▤
+            </span>
+            Данные школы
+          </button>
+          <button class="nav-item" data-page="timetable">
+            <span aria-hidden="true">
+              ▦
+            </span>
+            Расписание
+          </button>
+          <button class="nav-item" data-page="music">
+            <span aria-hidden="true">
+              ♫
+            </span>
+            Музыка
+          </button>
+          <button class="nav-item" data-page="bells">
+            <span aria-hidden="true">
+              ◷
+            </span>
+            Звонки и настройки
+          </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <span class="eyebrow">
+            МУЗЫКА В ШКОЛЕ
+          </span>
+          <strong>
+            Колонки компьютера с сервером
+          </strong>
+          <p>
+            Держите компьютер включённым в течение учебного дня.
+          </p>
+          <button class="button stop-button" data-stop="" type="button">
+            ■ Остановить музыку
+          </button>
+        </div>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <span class="breadcrumb">
+            Школа
+            <span aria-hidden="true">
+              /
+            </span>
+            <strong id="page-name">
+              Обзор
+            </strong>
+          </span>
+          <div class="status-chips">
+            <span class="chip" id="scheduler-chip">
+              Звонки…
+            </span>
+            <span class="chip" id="audio-chip">
+              Звук…
+            </span>
+          </div>
+          <div class="account">
+            <span id="account-name">
+            </span>
+            <button class="text-button" id="logout-button" type="button">
+              Выйти
+            </button>
+          </div>
+        </header>
+        <div aria-live="polite" class="notice" hidden="" id="notice" role="status">
+        </div>
+        <div class="notice error" hidden="" id="error" role="alert">
+        </div>
+        <section aria-labelledby="generation-title" class="generation-panel" hidden="" id="generation-panel">
+          <div class="generation-heading">
+            <div>
+              <span class="mini-label">
+                ГЕНЕРАЦИЯ РАСПИСАНИЯ
+              </span>
+              <h2 id="generation-title">
+                Ищем подходящий вариант…
+              </h2>
+            </div>
+            <button class="button secondary" id="generation-cancel" type="button">
+              Отменить
+            </button>
+          </div>
+          <p aria-live="polite" id="generation-progress" role="status">
+          </p>
+          <progress aria-label="Генерация расписания" id="generation-meter">
+          </progress>
+          <p class="hint" id="generation-hint">
+            Можно переходить между разделами. Новое расписание сохранится только после проверки.
+          </p>
+        </section>
+        <section class="page" id="page-overview">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">
+                УЧЕБНАЯ НЕДЕЛЯ ПОД КОНТРОЛЕМ
+              </p>
+              <h1>
+                Уроки по плану.
+                <br/>
+                Перемены с музыкой.
+              </h1>
+              <p>
+                Соберите расписание для всей школы, проверьте нагрузку и выберите, как прозвучит следующий звонок.
+              </p>
+            </div>
+            <div aria-hidden="true" class="hero-clock">
+              <span>
+                ПЕРВЫЙ УРОК
+              </span>
+              <strong id="hero-start">
+                08:30
+              </strong>
+              <small>
+                45 минут · понедельник — пятница
+              </small>
+            </div>
+          </div>
+          <div class="stats-grid" id="stats">
+          </div>
+          <div class="two-columns overview-columns">
+            <article class="card">
+              <div class="card-heading">
+                <span class="mini-label">
+                  ПОДГОТОВКА РАСПИСАНИЯ
+                </span>
+                <span class="dot">
+                </span>
+              </div>
+              <h2>
+                Начните с данных школы
+              </h2>
+              <p>
+                Добавьте классы, предметы и учителей. Для знакомства с приложением можно загрузить пример школы.
+              </p>
+              <div class="button-row">
+                <button class="button secondary" id="seed-button">
+                  Загрузить пример
+                </button>
+                <button class="button primary" data-generate="">
+                  Создать расписание
+                </button>
+              </div>
+              <p class="hint">
+                Пример: 6 классов и 6 учителей. Доступен, пока данные школы не заполнены.
+              </p>
+              <div class="summary-line" id="overview-summary">
+                Загружаем данные…
+              </div>
+              <div aria-live="polite" class="setup-check" id="setup-check">
+              </div>
+            </article>
+            <article class="card">
+              <span class="mini-label">
+                ТРИ ШАГА ДО УЧЕБНОЙ НЕДЕЛИ
+              </span>
+              <ol class="steps">
+                <li>
+                  <span>
+                    01
+                  </span>
+                  <div>
+                    <strong>
+                      Заполните учебный план
+                    </strong>
+                    <p>
+                      Укажите предметы, учителей и количество уроков в неделю.
+                    </p>
+                  </div>
+                </li>
+                <li>
+                  <span>
+                    02
+                  </span>
+                  <div>
+                    <strong>
+                      Создайте расписание
+                    </strong>
+                    <p>
+                      Программа проверит пересечения. При необходимости урок можно перенести вручную.
+                    </p>
+                  </div>
+                </li>
+                <li>
+                  <span>
+                    03
+                  </span>
+                  <div>
+                    <strong>
+                      Добавьте музыку
+                    </strong>
+                    <p>
+                      Загрузите MP3, настройте плейлист на перемену и включите автоматические звонки.
+                    </p>
+                  </div>
+                </li>
+              </ol>
+              <div class="rhythm-strip compact">
+                <span>
+                  <strong>
+                    45
+                  </strong>
+                  урок
+                </span>
+                <span>
+                  <strong>
+                    5
+                  </strong>
+                  перемена
+                </span>
+                <span>
+                  <strong>
+                    15
+                  </strong>
+                  большая
+                </span>
+              </div>
+            </article>
+          </div>
+          <article class="info-banner">
+            <strong>
+              Сначала проверьте звучание.
+            </strong>
+            <span>
+              По умолчанию звук и автоматические звонки выключены. Включите их после проверки времени и плейлистов.
+            </span>
+            <button class="text-button" data-page="bells">
+              Настроить звонки →
+            </button>
+          </article>
+        </section>
+        <section class="page" hidden="" id="page-school">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">
+                ДАННЫЕ ШКОЛЫ
+              </p>
+              <h1>
+                Основа хорошего расписания
+              </h1>
+              <p>
+                Готовые классы, учителя и недельная нагрузка по каждому предмету.
+              </p>
+            </div>
+          </div>
+          <p class="notice inline-notice">
+            После изменения данных школы расписание нужно создать заново. Существующий вариант будет очищен.
+          </p>
+          <nav aria-label="Разделы данных школы" class="school-subnav">
+            <button aria-controls="school-section-people" aria-pressed="true" class="school-step active" data-school-section="people" type="button">
+              <span>
+                01
+              </span>
+              <strong>
+                Предметы и учителя
+              </strong>
+              <small>
+                Кто и что преподаёт
+              </small>
+            </button>
+            <button aria-controls="school-section-classes" aria-pressed="false" class="school-step" data-school-section="classes" type="button">
+              <span>
+                02
+              </span>
+              <strong>
+                Классы и кабинеты
+              </strong>
+              <small>
+                Где проходят уроки
+              </small>
+            </button>
+            <button aria-controls="school-section-plan" aria-pressed="false" class="school-step" data-school-section="plan" type="button">
+              <span>
+                03
+              </span>
+              <strong>
+                Нагрузка и назначения
+              </strong>
+              <small>
+                Сколько уроков в неделю
+              </small>
+            </button>
+          </nav>
+          <section aria-label="Предметы и учителя" class="school-section" id="school-section-people">
+            <div class="two-columns">
+              <article class="card">
+                <h2>
+                  Предметы
+                </h2>
+                <form class="form-grid" id="subject-form">
+                  <label class="span-2">
+                    Название предмета
+                    <input maxlength="120" name="name" placeholder="Например, математика" required=""/>
+                  </label>
+                  <label class="checkbox span-2">
+                    <input name="is_hard" type="checkbox"/>
+                    По возможности ставить раньше
+                  </label>
+                  <button class="button primary" type="submit">
+                    Добавить предмет
+                  </button>
+                </form>
+                <div class="table-wrap compact-list" id="subject-list">
+                </div>
+              </article>
+              <article class="card">
+                <h2>
+                  Учителя
+                </h2>
+                <form class="form-grid" id="teacher-form">
+                  <label class="span-2">
+                    Имя учителя
+                    <input maxlength="120" name="name" placeholder="Имя и фамилия" required=""/>
+                  </label>
+                  <label class="span-2">
+                    Преподаваемые предметы
+                    <select multiple="" name="subject_ids" required="" size="4">
+                    </select>
+                    <span class="hint">
+                      Для выбора нескольких предметов удерживайте Command или Ctrl.
+                    </span>
+                  </label>
+                  <div class="button-row span-2">
+                    <button class="button primary" id="teacher-save" type="submit">
+                      Добавить учителя
+                    </button>
+                    <button class="button secondary" hidden="" id="teacher-cancel" type="button">
+                      Отменить
+                    </button>
+                  </div>
+                </form>
+                <div class="table-wrap compact-list" id="teacher-list">
+                </div>
+              </article>
+            </div>
+            <div class="school-next">
+              <p>
+                Добавьте предметы, затем выберите их у каждого учителя.
+              </p>
+              <button class="button secondary" data-school-section="classes" type="button">
+                Далее: классы →
+              </button>
+            </div>
+          </section>
+          <section aria-label="Классы и кабинеты" class="school-section" hidden="" id="school-section-classes">
+            <div class="two-columns">
+              <article class="card">
+                <h2>
+                  Параллели
+                </h2>
+                <p class="hint">
+                  Зарегистрируйте уровень обучения, затем добавьте существующие классы по названию.
+                </p>
+                <form class="form-grid" id="grade-form">
+                  <label>
+                    Уровень обучения
+                    <input max="11" min="1" name="number" placeholder="От 1 до 11" required="" type="number"/>
+                  </label>
+                  <label>
+                    Количество классов
+                    <input max="26" min="0" name="parallel_count" required="" type="number" value="0"/>
+                  </label>
+                  <label>
+                    Смена
+                    <select name="shift">
+                      <option value="1">
+                        Первая
+                      </option>
+                      <option value="2">
+                        Вторая
+                      </option>
+                    </select>
+                  </label>
+                  <label>
+                    Максимум уроков в день
+                    <input max="12" min="1" name="max_lessons_per_day" required="" type="number" value="4"/>
+                  </label>
+                  <button class="button primary" type="submit">
+                    Добавить параллель
+                  </button>
+                </form>
+                <p class="hint">
+                  Количество 0 — добавить классы вручную. Другое число создаст записи с названиями A, B, C… Ученики по классам не распределяются.
+                </p>
+                <div class="table-wrap compact-list" id="grade-list">
+                </div>
+                <form class="form-grid secondary-form" id="grade-limit-form">
+                  <label>
+                    Параллель
+                    <select name="grade_id" required="">
+                    </select>
+                  </label>
+                  <label>
+                    Новый лимит уроков
+                    <input max="12" min="1" name="max_lessons_per_day" required="" type="number" value="4"/>
+                  </label>
+                  <button class="button secondary" type="submit">
+                    Изменить лимит
+                  </button>
+                </form>
+              </article>
+              <article class="card">
+                <h2>
+                  Классы и кабинеты
+                </h2>
+                <form class="form-grid" id="class-form">
+                  <label>
+                    Параллель
+                    <select name="grade_id" required="">
+                    </select>
+                  </label>
+                  <label>
+                    Название класса
+                    <input maxlength="40" name="name" placeholder="Например, 7А" required=""/>
+                  </label>
+                  <label>
+                    Смена
+                    <select name="shift">
+                      <option value="1">
+                        Первая
+                      </option>
+                      <option value="2">
+                        Вторая
+                      </option>
+                    </select>
+                  </label>
+                  <div class="button-row span-2">
+                    <button class="button primary" id="class-save" type="submit">
+                      Добавить класс
+                    </button>
+                    <button class="button secondary" hidden="" id="class-cancel" type="button">
+                      Отменить
+                    </button>
+                  </div>
+                </form>
+                <div class="table-wrap compact-list" id="class-list">
+                </div>
+                <form class="form-grid secondary-form" id="room-form">
+                  <label class="span-2">
+                    Кабинет
+                    <input maxlength="80" name="name" placeholder="Например, 204" required=""/>
+                  </label>
+                  <button class="button secondary" type="submit">
+                    Добавить кабинет
+                  </button>
+                </form>
+                <div class="tag-list" id="room-list">
+                </div>
+                <p class="hint">
+                  Вторую смену и проверку кабинетов можно включить в настройках.
+                </p>
+              </article>
+            </div>
+            <div class="school-next">
+              <p>
+                После регистрации классов задайте недельную нагрузку и назначьте учителей.
+              </p>
+              <button class="button secondary" data-school-section="plan" type="button">
+                Далее: учебный план →
+              </button>
+            </div>
+          </section>
+          <section aria-label="Нагрузка и назначения" class="school-section" hidden="" id="school-section-plan">
+            <div class="two-columns">
+              <article class="card">
+                <h2>
+                  Учебный план
+                </h2>
+                <p class="hint">
+                  Общее количество уроков по предмету для классов одной параллели. Индивидуальную нагрузку можно указать при назначении учителя.
+                </p>
+                <form class="form-grid" id="curriculum-form">
+                  <label>
+                    Параллель
+                    <select name="grade_id" required="">
+                    </select>
+                  </label>
+                  <label>
+                    Предмет
+                    <select name="subject_id" required="">
+                    </select>
+                  </label>
+                  <label>
+                    Уроков в неделю
+                    <input max="60" min="1" name="lessons_per_week" required="" type="number" value="3"/>
+                  </label>
+                  <div class="form-action">
+                    <button class="button primary" type="submit">
+                      Сохранить нагрузку
+                    </button>
+                  </div>
+                </form>
+                <div class="table-wrap compact-list" id="curriculum-list">
+                </div>
+              </article>
+              <article class="card">
+                <h2>
+                  Назначение учителей
+                </h2>
+                <p class="hint">
+                  Для каждого предмета в классе назначьте учителя. Повторное сохранение обновляет назначение.
+                </p>
+                <form class="form-grid" id="assignment-form">
+                  <label>
+                    Класс
+                    <select name="class_id" required="">
+                    </select>
+                  </label>
+                  <label>
+                    Предмет
+                    <select name="subject_id" required="">
+                    </select>
+                  </label>
+                  <label>
+                    Учитель
+                    <select name="teacher_id" required="">
+                    </select>
+                  </label>
+                  <label>
+                    Кабинет
+                    <select name="room_id">
+                    </select>
+                  </label>
+                  <label class="span-2">
+                    Индивидуальное количество уроков в неделю
+                    <input max="60" min="1" name="lessons_per_week" placeholder="Необязательно — используется учебный план" type="number"/>
+                    <span class="hint">
+                      Заполните, если у этого класса своя нагрузка по предмету.
+                    </span>
+                  </label>
+                  <button class="button primary" type="submit">
+                    Сохранить назначение
+                  </button>
+                </form>
+                <div class="table-wrap compact-list" id="assignment-list">
+                </div>
+              </article>
+            </div>
+            <div class="school-next">
+              <p>
+                Для каждого предмета в классе должен быть назначен учитель.
+              </p>
+              <button class="button primary" data-generate="" type="button">
+                Создать расписание
+              </button>
+            </div>
+          </section>
+        </section>
+        <section class="page" hidden="" id="page-timetable">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">
+                УЧЕБНАЯ НЕДЕЛЯ
+              </p>
+              <h1>
+                Расписание без пересечений
+              </h1>
+              <p>
+                Класс и учитель не могут находиться на двух уроках одновременно.
+              </p>
+            </div>
+            <button class="button primary" data-generate="">
+              Создать расписание
+            </button>
+          </div>
+          <details class="generation-options">
+            <summary>
+              Параметры генерации
+            </summary>
+            <div class="inline-form">
+              <label>
+                Начальное число для генерации
+                <input id="generation-seed" max="2147483647" min="0" placeholder="Случайное" step="1" type="number"/>
+              </label>
+              <label class="checkbox">
+                <input id="generation-optimize" type="checkbox"/>
+                Улучшить распределение до лимита времени
+              </label>
+            </div>
+            <p class="hint">
+              Быстрый черновик сохраняет первый корректный вариант. Режим «Улучшить распределение» старается сократить окна и выровнять нагрузку, но не гарантирует расписание без окон. Новая генерация может вернуть тот же вариант, если требований много.
+            </p>
+          </details>
+          <p class="hint" id="generation-info">
+          </p>
+          <p class="timetable-quality" id="timetable-quality" hidden>
+          </p>
+          <article class="card">
+            <div class="filter-row">
+              <label>
+                Показать расписание
+                <select id="view-type">
+                  <option value="class">
+                    Класса
+                  </option>
+                  <option value="teacher">
+                    Учителя
+                  </option>
+                </select>
+              </label>
+              <label class="filter-person">
+                <span id="view-label">
+                  Класс
+                </span>
+                <select id="view-id">
+                </select>
+              </label>
+              <div class="filter-note">
+                <span class="chip accent">
+                  Понедельник — пятница
+                </span>
+                <small>
+                  Нажмите на урок, чтобы перенести.
+                </small>
+              </div>
+            </div>
+            <div class="timetable-actions">
+              <h2 id="timetable-title">
+                Расписание
+              </h2>
+              <div class="button-row">
+                <button class="button secondary" disabled="" id="timetable-export" type="button">
+                  Скачать CSV
+                </button>
+                <button class="button secondary" disabled="" id="timetable-print" type="button">
+                  Печать / PDF
+                </button>
+              </div>
+            </div>
+            <div class="table-wrap timetable-wrap" id="timetable-grid">
+            </div>
+            <p class="hint" id="timetable-count">
+            </p>
+          </article>
+          <article class="card edit-card" hidden="" id="lesson-editor">
+            <div class="section-heading">
+              <div>
+                <span class="mini-label">
+                  ПЕРЕНОС УРОКА
+                </span>
+                <h2 id="edit-lesson-title">
+                  Перенести урок
+                </h2>
+              </div>
+              <button class="text-button" id="cancel-lesson-edit" type="button">
+                Закрыть
+              </button>
+            </div>
+            <form class="inline-form" id="lesson-form">
+              <label>
+                День
+                <select name="weekday">
+                  <option value="0">
+                    Понедельник
+                  </option>
+                  <option value="1">
+                    Вторник
+                  </option>
+                  <option value="2">
+                    Среда
+                  </option>
+                  <option value="3">
+                    Четверг
+                  </option>
+                  <option value="4">
+                    Пятница
+                  </option>
+                </select>
+              </label>
+              <label>
+                Урок
+                <select name="period">
+                </select>
+              </label>
+              <button class="button primary" type="submit">
+                Проверить и перенести
+              </button>
+            </form>
+            <p class="hint">
+              Предмет и учитель сохранятся. Если новое время создаёт пересечение, перенос не будет выполнен.
+            </p>
+          </article>
+        </section>
+        <section class="page" hidden="" id="page-music">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">
+                МУЗЫКА НА ПЕРЕМЕНАХ
+              </p>
+              <h1>
+                У каждого звонка — свой звук
+              </h1>
+              <p>
+                Загрузите музыку и настройте очередность треков на короткую и большую перемену.
+              </p>
+            </div>
+            <button class="button stop-outline" data-stop="" type="button">
+              ■ Остановить музыку
+            </button>
+          </div>
+          <div class="two-columns">
+            <article class="card">
+              <span class="mini-label">
+                МУЗЫКАЛЬНАЯ БИБЛИОТЕКА
+              </span>
+              <h2>
+                Добавить трек
+              </h2>
+              <form id="upload-form">
+                <label class="upload-zone">
+                  Выберите файл MP3 или WAV
+                  <input accept=".mp3,.wav,audio/mpeg,audio/wav" name="file" required="" type="file"/>
+                  <span class="hint">
+                    До 25 МиБ на один файл
+                  </span>
+                </label>
+                <button class="button primary" type="submit">
+                  Загрузить
+                </button>
+              </form>
+              <div class="compact-list" id="track-list">
+              </div>
+            </article>
+            <article class="card">
+              <span class="mini-label">
+                ПРОВЕРКА ЗВУКА
+              </span>
+              <h2>
+                Прослушайте перед запуском
+              </h2>
+              <form id="test-form">
+                <label>
+                  Трек
+                  <select name="track_id" required="">
+                  </select>
+                </label>
+                <div class="button-row">
+                  <button class="button primary" type="submit">
+                    ▶ Проверить
+                  </button>
+                  <button class="button secondary" data-stop="" type="button">
+                    ■ Стоп
+                  </button>
+                </div>
+              </form>
+              <p class="hint">
+                Музыка звучит на компьютере с сервером. Если звук выключен в настройках, выполняется проверка без звучания.
+              </p>
+              <div class="audio-status" id="player-status" role="status">
+                Ожидание проверки…
+              </div>
+              <button class="text-button" id="refresh-player" type="button">
+                Обновить состояние
+              </button>
+            </article>
+          </div>
+          <article class="card">
+            <div class="section-heading">
+              <div>
+                <span class="mini-label">
+                  ПЛЕЙЛИСТЫ
+                </span>
+                <h2>
+                  Что звучит на звонке
+                </h2>
+              </div>
+              <label class="event-selector">
+                Событие
+                <select id="playlist-event">
+                </select>
+              </label>
+            </div>
+            <p class="hint">
+              На каждом звонке включается следующий трек по порядку. Один трек можно добавить несколько раз.
+            </p>
+            <div id="playlist-items">
+            </div>
+            <div class="playlist-controls">
+              <label>
+                Добавить трек
+                <select id="playlist-track">
+                </select>
+              </label>
+              <button class="button secondary" id="playlist-add" type="button">
+                + В плейлист
+              </button>
+              <button class="button primary" id="playlist-save" type="button">
+                Сохранить плейлист
+              </button>
+            </div>
+            <p class="hint" id="playlist-saved-note">
+            </p>
+          </article>
+        </section>
+        <section class="page" hidden="" id="page-bells">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">
+                ЗВОНКИ И НАСТРОЙКИ
+              </p>
+              <h1>
+                Ритм учебного дня
+              </h1>
+              <p>
+                Урок — 45 минут. Перемена — 5 минут. Большая перемена — 15 минут.
+              </p>
+            </div>
+          </div>
+          <div class="two-columns settings-columns">
+            <article class="card">
+              <h2>
+                Время и звук
+              </h2>
+              <form class="form-grid" id="settings-form">
+                <label>
+                  Первый урок
+                  <input name="start_time" required="" type="time"/>
+                </label>
+                <label>
+                  Начало второй смены
+                  <input name="second_shift_start_time" required="" type="time"/>
+                </label>
+                <label class="checkbox span-2">
+                  <input name="shifts_enabled" type="checkbox"/>
+                  Две смены
+                </label>
+                <label>
+                  Большая перемена после урока
+                  <input max="11" min="1" name="long_break_after" required="" type="number"/>
+                </label>
+                <label>
+                  Максимум уроков в день
+                  <input max="12" min="1" name="max_lessons_per_day" required="" type="number"/>
+                </label>
+                <label class="span-2">
+                  Часовой пояс
+                  <input name="timezone" placeholder="Asia/Almaty" required=""/>
+                  <span class="hint">
+                    Например, Asia/Almaty.
+                  </span>
+                </label>
+                <label>
+                  Музыка на звонке, секунд
+                  <input max="120" min="1" name="playback_duration" required="" type="number"/>
+                </label>
+                <label>
+                  Плавное затухание, секунд
+                  <input max="30" min="0" name="fade_out_seconds" required="" type="number"/>
+                </label>
+                <label class="span-2">
+                  Лимит генерации, секунд
+                  <input max="300" min="1" name="solver_time_limit" required="" type="number"/>
+                </label>
+                <label class="checkbox span-2">
+                  <input name="use_rooms" type="checkbox"/>
+                  Проверять пересечения кабинетов
+                </label>
+                <div class="toggle-box span-2">
+                  <label class="checkbox">
+                    <input name="audio_enabled" type="checkbox"/>
+                    Включить звук на колонках
+                  </label>
+                  <p>
+                    Когда выключено, проверка проходит без звучания.
+                  </p>
+                  <label class="checkbox">
+                    <input name="scheduler_enabled" type="checkbox"/>
+                    Автоматические звонки
+                  </label>
+                  <p>
+                    С понедельника по пятницу по часовому поясу школы.
+                  </p>
+                </div>
+                <button class="button primary" type="submit">
+                  Сохранить настройки
+                </button>
+              </form>
+              <p class="hint">
+                Смены не должны пересекаться. Для начала в 08:30 и 14:00 выберите не более 6 уроков за смену.
+              </p>
+            </article>
+            <article class="card">
+              <span class="mini-label">
+                РАСПОРЯДОК ДНЯ
+              </span>
+              <h2>
+                Уроки и перемены
+              </h2>
+              <div class="table-wrap" id="period-list">
+              </div>
+              <div class="priority-note">
+                <strong>
+                  Один трек в каждый момент
+                </strong>
+                <p>
+                  Если несколько событий совпадают, используется первый непустой плейлист в этом порядке:
+                </p>
+                <p id="bell-priority">
+                </p>
+                <p class="hint">
+                  Например, музыка большой перемены имеет приоритет перед звонком на конец урока.
+                </p>
+              </div>
+            </article>
+          </div>
+          <article class="card">
+            <div class="section-heading">
+              <div>
+                <span class="mini-label">
+                  ПО СОХРАНЁННОМУ РАСПИСАНИЮ
+                </span>
+                <h2>
+                  План звонков
+                </h2>
+              </div>
+              <label>
+                День
+                <select id="bell-day">
+                  <option value="0">
+                    Понедельник
+                  </option>
+                  <option value="1">
+                    Вторник
+                  </option>
+                  <option value="2">
+                    Среда
+                  </option>
+                  <option value="3">
+                    Четверг
+                  </option>
+                  <option value="4">
+                    Пятница
+                  </option>
+                </select>
+              </label>
+            </div>
+            <div class="table-wrap" id="bell-list">
+            </div>
+            <p class="hint">
+              По выходным звонков нет. Пропущенные звонки после длительной паузы или перезапуска не проигрываются.
+            </p>
+          </article>
+        </section>
+        <footer>
+          Школьный ритм
+          <span>
+            Расписание · Учебная неделя · Музыкальные звонки
+          </span>
+        </footer>
+      </main>
+    </div>
+    <dialog aria-describedby="confirmation-message" aria-labelledby="confirmation-title" class="confirmation-dialog" id="confirmation-dialog">
+      <form method="dialog">
+        <span class="mini-label">
+          ПОДТВЕРЖДЕНИЕ ИЗМЕНЕНИЯ
+        </span>
+        <h2 id="confirmation-title">
+          Продолжить?
+        </h2>
+        <p id="confirmation-message">
+        </p>
+        <div class="button-row">
+          <button autofocus="" class="button secondary" id="confirmation-cancel" value="cancel">
+            Отменить
+          </button>
+          <button class="button primary" id="confirmation-accept" value="confirm">
+            Продолжить
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <noscript>
+      Для работы приложения включите JavaScript в браузере.
+    </noscript>
+  </body>
+</html>
